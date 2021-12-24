@@ -1,7 +1,7 @@
 // Coding challenge: csv2json in nodejs
 // Maruan Bakri Ottoni
 //
-// TODO: Merge if the perosn is studid and make the form 2 times
+// TODO:
 
 
 // Libraries used
@@ -10,7 +10,7 @@ const PNF = require('google-libphonenumber').PhoneNumberFormat;
 const phoneUtil = require('google-libphonenumber').PhoneNumberUtil.getInstance();
 
 // Read CSV file as input and convert to array
-var data = fs.readFileSync("input.csv", "UTF8");
+var data = fs.readFileSync("input1.csv", "UTF8");
 data = data.split(/\n/);
 
 for (let i=0; i<data.length; i++) {
@@ -38,57 +38,73 @@ for (let k=1; k < data.length; k++) {
     var person = {};
     var address = [];
     // Prepare for keys in JSON file
-    for (let i=0; i < data[0].length; i++) {
-        // Data
-        switch(data[0][i]) {
-            case 'fullname':
-                person[data[0][i]] = data[k][i];
-                break
-            case 'eid':
-                person[data[0][i]] = data[k][i];
-                break
-            case 'group':
-                if(on) {
-                    prepare_groups_string(data,k,i)
-                    on = false;
-                }
-                break
-            case 'see_all':
-                string_bool(data,k,i);
-                break
-            case 'invisible':
-                string_bool(data,k,i);
-                break
-            default:
-                // Addreses
-                let raw = data[0][i].split(' ');
-                if(raw[0] === 'email' && isValideEmail(data[k][i])) {
-                    address.push(address_tags(data,raw,k,i));
-                }
-                else if(raw[0]==='phone' && isValidePhone(data[k][i])) {
-                    address.push(address_tags(data,raw,k,i));
-                }
+    if (isnotOnJson(json_arr,data[k][1])) {
+        for (let i=0; i < data[0].length; i++) {
+            // Data
+            switch(data[0][i]) {
+                case 'fullname':
+                    person[data[0][i]] = data[k][i];
+                    break
+                case 'eid':
+                    person[data[0][i]] = data[k][i];
+                    break
+                case 'group':
+                    if(on) {
+                        prepare_groups_string(data,k,i)
+                        on = false;
+                    }
+                    break
+                case 'see_all':
+                    string_bool(data,k,i);
+                    break
+                case 'invisible':
+                    string_bool(data,k,i);
+                    break
+                default:
+                    // Addreses
+                    let raw = data[0][i].split(' ');
+                    if(raw[0] === 'email' && isValideEmail(data[k][i])) {
+                        address.push(address_tags(data,raw,k,i));
+                    }
+                    else if(raw[0]==='phone' && isValidePhone(data[k][i])) {
+                        address.push(address_tags(data,raw,k,i));
+                    }
             }
         }
-
-    person['addresses'] = address;
-
-    //console.log(person)
-
-    // Save info to an element in the array
-    json_arr.push(person);
+        person['addresses'] = address;
+        // Save info to an element in the array
+        json_arr.push(person);
+    }
 }
 
-
-
-//console.log(json_arr)
-//console.log(stringify(json_arr))
 
 // Save JSON file
 const myConsole = new console.Console(fs.createWriteStream('./output.json'));
 myConsole.log(JSON.stringify(json_arr,null,2));
 
 
+
+
+
+
+
+
+
+
+/********************/
+/* Helper Functions */
+/********************/
+
+// Check if person is alredy on json file
+function isnotOnJson(json,eid) {
+    let isTrue = true;
+    for(let i=0;i<json.length;i++) {
+        if(json[i].eid === eid){
+            isTrue = false;
+        }
+    }
+    return isTrue
+}
 
 // Function to parse address to a correct format
 // Prepare the type, tag, and addres keys
